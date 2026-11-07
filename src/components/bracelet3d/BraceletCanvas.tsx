@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef, useState } from 'react'
+import React, { Suspense, useEffect, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import * as THREE from 'three'
@@ -7,9 +7,9 @@ import BraceletScene from './BraceletScene'
 type CameraPreset = 'front' | 'angled' | 'top'
 
 const presetPositions: Record<CameraPreset, { pos: [number, number, number]; target: [number, number, number] }> = {
-  front: { pos: [0, 1.3, 4.0], target: [0, 0, 0] },
-  angled: { pos: [2.6, 2.1, 2.6], target: [0, 0, 0] },
-  top: { pos: [0, 4.2, 0.15], target: [0, 0, 0] },
+  front: { pos: [0, 1.15, 4.1], target: [0, -0.05, 0] },
+  angled: { pos: [2.55, 2.0, 2.75], target: [0, -0.05, 0] },
+  top: { pos: [0, 4.3, 0.25], target: [0, -0.05, 0] },
 }
 
 type Props = {
@@ -78,7 +78,7 @@ function SceneWrapper({
 
   return (
     <>
-      <PerspectiveCamera ref={cameraRef} makeDefault position={presetPositions.angled.pos} fov={42} />
+      <PerspectiveCamera ref={cameraRef} makeDefault position={presetPositions.angled.pos} fov={40} />
       <BraceletScene cordId={cordId} beads={beads} selectedIndex={selectedIndex} onSelect={onSelect} autoSpin={autoSpin} />
       <OrbitControls
         ref={controlsRef}
@@ -87,8 +87,8 @@ function SceneWrapper({
         enablePan={false}
         minDistance={2.2}
         maxDistance={7.5}
-        maxPolarAngle={Math.PI * 0.49}
-        minPolarAngle={Math.PI * 0.08}
+        minPolarAngle={0.001}
+        maxPolarAngle={Math.PI - 0.001}
         target={new THREE.Vector3(0, 0, 0)}
       />
     </>
@@ -115,9 +115,6 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode; fallbac
     return this.props.children
   }
 }
-
-// Need React import for ErrorBoundary
-import React from 'react'
 
 export default function BraceletCanvas(props: Props) {
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>('angled')
@@ -149,14 +146,15 @@ export default function BraceletCanvas(props: Props) {
       <div className="bracelet-canvas-wrap">
         <ErrorBoundary fallback={<FallbackMessage />}>
           <Canvas
-            shadows
+            shadows="soft"
             dpr={[1, 1.8]}
             gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
             onCreated={({ gl }) => {
-              gl.setClearColor('#fff7f0', 0)
+              gl.setClearColor('#000000', 0)
+              gl.toneMappingExposure = 1.0
             }}
             style={{ width: '100%', height: '100%' }}
-            camera={{ position: presetPositions.angled.pos, fov: 42 }}
+            camera={{ position: presetPositions.angled.pos, fov: 40 }}
             aria-label="3D friendship bracelet viewer. Drag to turn it around, scroll to zoom."
           >
             <Suspense fallback={null}>
